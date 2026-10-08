@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Collatz</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+  <style>
+    body { margin: 0; background: #111; overflow: hidden; }
+    canvas { display: block; }
+
+    /* Invisible until hovered (or while a tool is open); fully hidden during an animation. */
+    #toolbar {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    #toolbar:hover, #toolbar:has(.open) { opacity: 1; }
+    #toolbar.hidden { opacity: 0; pointer-events: none; }
+
+    /* Each tool is an icon that turns into its panel when clicked. */
+    .tool.open .icon, .tool:not(.open) .panel { display: none; }
+
+    .icon, .panel {
+      box-sizing: border-box;
+      height: 36px;
+      background: #1c1c1c;
+      color: #bbb;
+      border: 1px solid #444;
+      border-radius: 8px;
+      font: 14px system-ui, sans-serif;
+      outline: none;
+    }
+    .icon {
+      width: 36px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+    .icon:hover { color: #fff; border-color: #7fd1c7; }
+    .icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+
+    #number-input { width: 140px; padding: 0 12px; color: #eee; }
+    #number-input:focus { border-color: #7fd1c7; }
+    #number-input.invalid { border-color: #e0707a; }
+
+    .tool.open #size-panel { display: flex; }
+    #size-panel {
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+      border-color: #7fd1c7;
+    }
+
+    /* Discrete slider: one tick per power of 10, the thumb snaps between them. */
+    #size-track { width: 120px; }
+    #size-ticks {
+      display: flex;
+      justify-content: space-between;
+      padding: 0 6px; /* half the thumb width, so ticks line up with thumb centres */
+      height: 6px;
+      margin-bottom: 2px;
+    }
+    #size-ticks span { width: 1px; background: #555; }
+    #size-ticks span.active { background: #7fd1c7; }
+
+    #size-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      display: block;
+      width: 100%;
+      height: 12px;
+      margin: 0;
+      background: transparent;
+      cursor: pointer;
+    }
+    #size-slider::-webkit-slider-runnable-track { height: 2px; background: #444; border-radius: 1px; }
+    #size-slider::-moz-range-track { height: 2px; background: #444; border-radius: 1px; }
+    #size-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      margin-top: -5px;
+      border-radius: 50%;
+      background: #7fd1c7;
+    }
+    #size-slider::-moz-range-thumb { width: 12px; height: 12px; border: none; border-radius: 50%; background: #7fd1c7; }
+    #size-value { min-width: 3.5em; text-align: right; color: #eee; font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+  <div id="toolbar">
+    <div class="tool" id="search-tool">
+      <input id="number-input" class="panel" type="text" inputmode="numeric" placeholder="Pick a number" autocomplete="off">
+      <button class="icon" title="Find a number">
+        <svg viewBox="0 0 18 18"><circle cx="7.5" cy="7.5" r="5"/><line x1="11.2" y1="11.2" x2="16" y2="16"/></svg>
+      </button>
+    </div>
+
+    <div class="tool" id="size-tool">
+      <div id="size-panel" class="panel" tabindex="-1">
+        <div id="size-track">
+          <div id="size-ticks"></div>
+          <input id="size-slider" type="range" step="1">
+        </div>
+        <span id="size-value"></span>
+      </div>
+      <button class="icon" title="Tree size">
+        <svg viewBox="0 0 18 18"><rect x="7" y="2.5" width="4" height="3" rx="0.5"/><rect x="5" y="7.5" width="8" height="3" rx="0.5"/><rect x="3" y="12.5" width="12" height="3" rx="0.5"/></svg>
+      </button>
+    </div>
+
+    <div class="tool" id="flower-tool">
+      <button class="icon" title="Bloom">
+        <svg viewBox="0 0 18 18"><circle cx="9" cy="4.5" r="2.5"/><circle cx="13.5" cy="9" r="2.5"/><circle cx="9" cy="13.5" r="2.5"/><circle cx="4.5" cy="9" r="2.5"/><circle cx="9" cy="9" r="1.2" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </div>
+  <script src="sketch.js"></script>
+</body>
+</html>
